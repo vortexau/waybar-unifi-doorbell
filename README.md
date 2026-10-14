@@ -103,7 +103,9 @@ definition object. Do both:
   ring time. This is driven by the `status` subcommand, which Waybar re-runs when
   the daemon sends `SIGRTMIN+<waybar_signal>` (default 8 — change `waybar_signal`
   in config.json and `"signal"` in the module together if 8 collides). Append the
-  `doorbell-flash` rule from `waybar/style.css` to your stylesheet.
+  `doorbell-flash` rule from `waybar/style.css` to your stylesheet. Tune the flash
+  by editing its two `@define-color doorbell-flash-a`/`-b` colours and the `0.8s`
+  duration on the `#custom-doorbell.ringing` animation line.
 
   Mind the commas: every object in the config is comma-separated, so the block
   needs a trailing `,` unless it is the last entry. The `format` value is a

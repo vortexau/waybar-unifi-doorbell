@@ -13,17 +13,22 @@
     color: #89b4fa;
 }
 
-/* Flash while the doorbell is ringing (the `status` subcommand sets the
-   .ringing class). Adjust colours to your theme; @define-color users might
-   use @surface/@green/@bg-deep as below.
-   NOTE: GTK's CSS (what Waybar uses) does NOT support comma-separated keyframe
-   selectors like `0%, 100%` — use separate from/to/percentage blocks, and
-   animate `background-color` (not the `background` shorthand). */
+/* ─── Doorbell flash knobs — edit these ──────────────────────────────
+   The icon pulses between two colours while ringing (the `status`
+   subcommand sets the .ringing class). Change the two colours below and
+   the speed on the animation line. @define-color names can reference your
+   theme colours (as here) or be literals like #33d669.
+   NOTE: GTK's CSS (what Waybar uses) does NOT support comma-separated
+   keyframe selectors like `0%, 100%` — use separate from/to/percentage
+   blocks, and animate `background-color` (not the `background` shorthand). */
+@define-color doorbell-flash-a @surface;   /* trough: pill background / icon colour */
+@define-color doorbell-flash-b @green;     /* peak:   pill background / icon colour */
+
 @keyframes doorbell-flash {
-    from { background-color: @surface; color: @green; }
-    50%  { background-color: @green;   color: @bg-deep; }
-    to   { background-color: @surface; color: @green; }
+    from { background-color: @doorbell-flash-a; color: @doorbell-flash-b; }
+    50%  { background-color: @doorbell-flash-b; color: @doorbell-flash-a; }
+    to   { background-color: @doorbell-flash-a; color: @doorbell-flash-b; }
 }
 #custom-doorbell.ringing {
-    animation: doorbell-flash 0.8s ease-in-out infinite;
+    animation: doorbell-flash 0.8s ease-in-out infinite;   /* ← flash speed */
 }
