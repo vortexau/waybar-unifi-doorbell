@@ -28,7 +28,8 @@ func Dir() string {
 	if x := os.Getenv("XDG_CONFIG_HOME"); x != "" {
 		return filepath.Join(x, "waybar-unifi-cam")
 	}
-	return filepath.Join(os.Getenv("HOME"), ".config", "waybar-unifi-cam")
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, ".config", "waybar-unifi-cam")
 }
 
 func DefaultPath() string { return filepath.Join(Dir(), "config.json") }

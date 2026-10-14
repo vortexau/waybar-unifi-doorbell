@@ -131,3 +131,23 @@ func TestMpvArgsAudio(t *testing.T) {
 		t.Fatalf("audio-off args wrong: %v", off)
 	}
 }
+
+func TestIsOpen(t *testing.T) {
+	f := newFake()
+	pp := pidFile(t)
+	if IsOpen(pp, f) {
+		t.Fatal("no pidfile: expected not open")
+	}
+	if err := Toggle(pp, Options{}, f); err != nil {
+		t.Fatal(err)
+	}
+	if !IsOpen(pp, f) {
+		t.Fatal("after open: expected IsOpen true")
+	}
+	if err := os.WriteFile(pp, []byte("99999"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if IsOpen(pp, f) {
+		t.Fatal("stale pid: expected not open")
+	}
+}

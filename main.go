@@ -17,6 +17,8 @@ import (
 	"waybar-unifi-cam/internal/view"
 )
 
+const resolveTimeout = 20 * time.Second
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "usage: waybar-unifi-cam {trust|daemon|toggle|show}")
@@ -84,7 +86,7 @@ func loadClient() (*config.Config, *protect.Client, error) {
 	}
 	pemBytes, err := os.ReadFile(config.CertPath())
 	if err != nil {
-		return nil, nil, fmt.Errorf("pinned cert missing (%v); run: waybar-unifi-cam trust", err)
+		return nil, nil, fmt.Errorf("pinned cert missing; run: waybar-unifi-cam trust: %w", err)
 	}
 	tlsConf, err := tlspin.ConfigFromPEM(pemBytes, cfg.Host)
 	if err != nil {
@@ -125,7 +127,7 @@ func cmdView(show bool) error {
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), resolveTimeout)
 	defer cancel()
 	url, err := resolveStream(ctx, cfg, c)
 	if err != nil {
@@ -153,14 +155,18 @@ func cmdDaemon(args []string) error {
 	defer stop()
 
 	onRing := func() {
-		rctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-		defer cancel()
-		url, err := resolveStream(rctx, cfg, c)
-		if err != nil {
-			log.Println("ring: cannot resolve stream:", err)
-			return
-		}
-		go view.Show(pidPath(), options(cfg, url), view.OSRunner{})
+		go func() {
+			rctx, cancel := context.WithTimeout(ctx, resolveTimeout)
+			defer cancel()
+			url, err := resolveStream(rctx, cfg, c)
+			if err != nil {
+				log.Println("ring: cannot resolve stream:", err)
+				return
+			}
+			if err := view.Show(pidPath(), options(cfg, url), view.OSRunner{}); err != nil {
+				log.Println("ring: show failed:", err)
+			}
+		}()
 	}
 
 	if *selfTest {
