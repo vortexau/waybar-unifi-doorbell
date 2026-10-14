@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"syscall"
@@ -13,6 +15,8 @@ import (
 
 	"waybar-unifi-cam/internal/config"
 	"waybar-unifi-cam/internal/protect"
+	"waybar-unifi-cam/internal/ringstate"
+	"waybar-unifi-cam/internal/status"
 	"waybar-unifi-cam/internal/tlspin"
 	"waybar-unifi-cam/internal/view"
 )
@@ -21,7 +25,7 @@ const resolveTimeout = 20 * time.Second
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: waybar-unifi-cam {trust|daemon|toggle|show}")
+		fmt.Fprintln(os.Stderr, "usage: waybar-unifi-cam {trust|daemon|toggle|show|status}")
 		os.Exit(2)
 	}
 	var err error
@@ -34,6 +38,8 @@ func main() {
 		err = cmdView(false)
 	case "show":
 		err = cmdView(true)
+	case "status":
+		err = cmdStatus()
 	default:
 		err = fmt.Errorf("unknown subcommand %q", os.Args[1])
 	}
@@ -41,6 +47,34 @@ func main() {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
+
+// signalWaybar tells Waybar to re-run the doorbell module's exec by sending
+// SIGRTMIN+n. Errors are ignored: Waybar may not be running, which is fine.
+func signalWaybar(n int) {
+	if n <= 0 {
+		n = 8
+	}
+	_ = exec.Command("pkill", fmt.Sprintf("-RTMIN+%d", n), "waybar").Run()
+}
+
+// cmdStatus prints the Waybar custom-module JSON for the doorbell icon. It never
+// errors out: a missing config or state file still yields valid JSON so Waybar
+// never shows a broken module.
+func cmdStatus() error {
+	flash := 30 * time.Second
+	if cfg, err := config.Load(config.DefaultPath()); err == nil {
+		flash = time.Duration(cfg.RingTimeoutSeconds) * time.Second
+	}
+	last, _ := ringstate.Read()
+	b, err := json.Marshal(status.Render(last, time.Now(), flash))
+	if err != nil {
+		// Should never happen for this struct; emit a safe fallback.
+		fmt.Println(`{"class":"","tooltip":"UniFi doorbell"}`)
+		return nil
+	}
+	fmt.Println(string(b))
+	return nil
 }
 
 func pidPath() string {
@@ -156,7 +190,19 @@ func cmdDaemon(args []string) error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	flash := time.Duration(cfg.RingTimeoutSeconds) * time.Second
 	onRing := func() {
+		if err := ringstate.Write(time.Now()); err != nil {
+			log.Println("ring: cannot write ring state:", err)
+		}
+		signalWaybar(cfg.WaybarSignal) // flash on
+		go func() {                    // flash off after the window
+			select {
+			case <-ctx.Done():
+			case <-time.After(flash):
+				signalWaybar(cfg.WaybarSignal)
+			}
+		}()
 		go func() {
 			rctx, cancel := context.WithTimeout(ctx, resolveTimeout)
 			defer cancel()
