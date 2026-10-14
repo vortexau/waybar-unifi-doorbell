@@ -1,0 +1,8 @@
+// Merge "custom/doorbell" into "modules-right" in ~/.config/waybar/config.jsonc,
+// then add this block:
+"custom/doorbell": {
+    "format": "󰥹",            // nf-md-doorbell (Nerd Font); change if yours differs
+    "tooltip": true,
+    "tooltip-format": "UniFi doorbell - click to toggle live view",
+    "on-click": "waybar-unifi-cam toggle"
+}

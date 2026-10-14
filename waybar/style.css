@@ -1,0 +1,5 @@
+/* Append to ~/.config/waybar/style.css */
+#custom-doorbell {
+    padding: 0 10px;
+    color: #89b4fa;
+}
