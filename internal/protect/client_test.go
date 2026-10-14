@@ -48,6 +48,10 @@ func TestCamerasAndFindDoorbell(t *testing.T) {
 func TestRTSPSURLPrefersHigh(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc(integrationBase+"/cameras/a/rtsps-stream", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-API-KEY") != "k" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		io.WriteString(w, `{"low":"rtsps://x/low","high":"rtsps://x/high"}`)
 	})
 	srv := httptest.NewServer(mux)
@@ -60,5 +64,12 @@ func TestRTSPSURLPrefersHigh(t *testing.T) {
 	}
 	if u != "rtsps://x/high" {
 		t.Fatalf("expected high quality, got %q", u)
+	}
+}
+
+func TestFindDoorbellAutoDetectFailure(t *testing.T) {
+	cams := []Camera{{ID: "c", Name: "Garage"}}
+	if _, err := FindDoorbell(cams, ""); err == nil {
+		t.Fatal("expected error when no doorbell can be auto-detected")
 	}
 }
