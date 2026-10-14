@@ -15,10 +15,14 @@
 
 /* Flash while the doorbell is ringing (the `status` subcommand sets the
    .ringing class). Adjust colours to your theme; @define-color users might
-   use @surface/@green/@bg-deep as below. */
+   use @surface/@green/@bg-deep as below.
+   NOTE: GTK's CSS (what Waybar uses) does NOT support comma-separated keyframe
+   selectors like `0%, 100%` — use separate from/to/percentage blocks, and
+   animate `background-color` (not the `background` shorthand). */
 @keyframes doorbell-flash {
-    0%, 100% { background: @surface; color: @green; }
-    50%      { background: @green;   color: @bg-deep; }
+    from { background-color: @surface; color: @green; }
+    50%  { background-color: @green;   color: @bg-deep; }
+    to   { background-color: @surface; color: @green; }
 }
 #custom-doorbell.ringing {
     animation: doorbell-flash 0.8s ease-in-out infinite;
