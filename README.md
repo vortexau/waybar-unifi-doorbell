@@ -4,6 +4,10 @@ View a UniFi G4 Doorbell Pro from a Waybar icon on Hyprland, with an automatic
 live-view pop-up when the doorbell rings. Uses the official UniFi Protect
 Integration API (API key) for both the RTSPS stream URL and the ring event.
 
+I built this with Claude to suit my own usage and needs, but feel free to point
+your own clanker at it and modify it to suit your needs. Genuinely useful fixes, 
+changes or updates will be integrated - so feel free to send PRs!
+
 ## Prerequisites
 
 1. **mpv** must run: `mpv --version`. On Manjaro, if it complains about a
