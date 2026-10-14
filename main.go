@@ -67,12 +67,9 @@ func cmdStatus() error {
 		flash = time.Duration(cfg.RingTimeoutSeconds) * time.Second
 	}
 	last, _ := ringstate.Read()
-	b, err := json.Marshal(status.Render(last, time.Now(), flash))
-	if err != nil {
-		// Should never happen for this struct; emit a safe fallback.
-		fmt.Println(`{"class":"","tooltip":"UniFi doorbell"}`)
-		return nil
-	}
+	// Marshal cannot fail for status.Line (two string fields), so the error is
+	// discarded; the result is always valid JSON.
+	b, _ := json.Marshal(status.Render(last, time.Now(), flash))
 	fmt.Println(string(b))
 	return nil
 }
