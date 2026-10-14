@@ -41,7 +41,8 @@ define CONFIG_TEMPLATE
   "camera": "",
   "window": { "width": 960, "height": 540, "position": "center", "always_on_top": true },
   "ring_timeout_seconds": 30,
-  "audio": true
+  "audio": true,
+  "waybar_signal": 8
 }
 endef
 export CONFIG_TEMPLATE

@@ -12,3 +12,14 @@
     padding: 0 10px;
     color: #89b4fa;
 }
+
+/* Flash while the doorbell is ringing (the `status` subcommand sets the
+   .ringing class). Adjust colours to your theme; @define-color users might
+   use @surface/@green/@bg-deep as below. */
+@keyframes doorbell-flash {
+    0%, 100% { background: @surface; color: @green; }
+    50%      { background: @green;   color: @bg-deep; }
+}
+#custom-doorbell.ringing {
+    animation: doorbell-flash 0.8s ease-in-out infinite;
+}

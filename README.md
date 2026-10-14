@@ -58,7 +58,8 @@ Create `~/.config/waybar-unifi-cam/config.json` (then lock it down):
   "camera": "",
   "window": { "width": 960, "height": 540, "position": "center", "always_on_top": true },
   "ring_timeout_seconds": 30,
-  "audio": true
+  "audio": true,
+  "waybar_signal": 8
 }
 ```
 
@@ -90,12 +91,19 @@ definition object. Do both:
 
   ```jsonc
   "custom/doorbell": {
+      "exec": "waybar-unifi-cam status",
+      "return-type": "json",
       "format": "󰥹",
-      "tooltip": true,
-      "tooltip-format": "UniFi doorbell - click to toggle live view",
+      "signal": 8,
       "on-click": "waybar-unifi-cam toggle"
-  },
+  }
   ```
+
+  The icon flashes while the doorbell is ringing and its tooltip shows the last
+  ring time. This is driven by the `status` subcommand, which Waybar re-runs when
+  the daemon sends `SIGRTMIN+<waybar_signal>` (default 8 — change `waybar_signal`
+  in config.json and `"signal"` in the module together if 8 collides). Append the
+  `doorbell-flash` rule from `waybar/style.css` to your stylesheet.
 
   Mind the commas: every object in the config is comma-separated, so the block
   needs a trailing `,` unless it is the last entry. The `format` value is a
