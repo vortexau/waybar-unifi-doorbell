@@ -45,3 +45,25 @@ func TestLoadRequiresHostAndKey(t *testing.T) {
 		t.Fatal("expected error for missing host")
 	}
 }
+
+func TestLoadWaybarSignalDefault(t *testing.T) {
+	p := writeConfig(t, `{"host":"h","api_key":"k"}`, 0o600)
+	c, err := Load(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.WaybarSignal != 8 {
+		t.Fatalf("expected default waybar_signal 8, got %d", c.WaybarSignal)
+	}
+}
+
+func TestLoadWaybarSignalExplicit(t *testing.T) {
+	p := writeConfig(t, `{"host":"h","api_key":"k","waybar_signal":5}`, 0o600)
+	c, err := Load(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.WaybarSignal != 5 {
+		t.Fatalf("expected waybar_signal 5, got %d", c.WaybarSignal)
+	}
+}

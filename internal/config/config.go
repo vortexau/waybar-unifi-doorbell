@@ -21,6 +21,7 @@ type Config struct {
 	Window             Window `json:"window"`
 	RingTimeoutSeconds int    `json:"ring_timeout_seconds"`
 	Audio              bool   `json:"audio"`
+	WaybarSignal       int    `json:"waybar_signal"`
 }
 
 // Dir returns the config directory, honouring XDG_CONFIG_HOME.
@@ -63,6 +64,9 @@ func Load(path string) (*Config, error) {
 	}
 	if c.RingTimeoutSeconds <= 0 {
 		c.RingTimeoutSeconds = 30
+	}
+	if c.WaybarSignal <= 0 {
+		c.WaybarSignal = 8
 	}
 	if c.Window.Width == 0 {
 		c.Window.Width = 960
