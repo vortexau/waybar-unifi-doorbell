@@ -52,11 +52,89 @@ waybar-unifi-cam trust
 
 ## Wire up Waybar & Hyprland
 
-- Add `"custom/doorbell"` to `modules-right` and merge `waybar/doorbell.jsonc`
-  into `~/.config/waybar/config.jsonc`; append `waybar/style.css` to your
-  Waybar `style.css`. Reload Waybar.
-- Append `hyprland/windowrule.conf` rules to your Hyprland config and reload
-  (`hyprctl reload`).
+Waybar needs **two** edits — one in the config and one in the stylesheet — and
+they must be done by hand (do not pipe the snippet files into your config; they
+are fragments, not drop-in replacements).
+
+### 1. Add the module to `~/.config/waybar/config.jsonc`
+
+A custom module needs **both** an entry in a `modules-*` list *and* a matching
+definition object. Do both:
+
+- Add `"custom/doorbell"` to one of your `modules-left` / `modules-center` /
+  `modules-right` arrays, wherever you want the icon to sit.
+- Add the definition object (from `waybar/doorbell.jsonc`) alongside your other
+  module definitions. The key name must match exactly:
+
+  ```jsonc
+  "custom/doorbell": {
+      "format": "󰥹",
+      "tooltip": true,
+      "tooltip-format": "UniFi doorbell - click to toggle live view",
+      "on-click": "waybar-unifi-cam toggle"
+  },
+  ```
+
+  Mind the commas: every object in the config is comma-separated, so the block
+  needs a trailing `,` unless it is the last entry. The `format` value is a
+  Nerd Font glyph (`nf-md-doorbell`); if you see a blank box or tofu, change it
+  to any icon your bar font provides, or plain text like `"DOOR"`.
+
+### 2. Add the style to `~/.config/waybar/style.css`
+
+Append a rule for `#custom-doorbell` (Waybar maps the module `custom/doorbell`
+to the CSS id `#custom-doorbell`). The repo's `waybar/style.css` uses a generic
+blue; adapt the colour to your theme. For example, a theme that defines colours
+with `@define-color`:
+
+```css
+#custom-doorbell {
+    color: @green;      /* or a literal like #89b4fa */
+    padding: 2px 14px;
+}
+
+#custom-doorbell:hover {
+    color: @bright;
+}
+```
+
+**How to append correctly.** Paste the rule into the file with an editor, or
+append the *contents* of the snippet file — not its name:
+
+```bash
+# correct: appends the file's contents
+cat /path/to/repo/waybar/style.css >> ~/.config/waybar/style.css
+
+# WRONG: this writes the literal text "waybar/style.css" into your stylesheet,
+# which is invalid CSS and makes Waybar fail to load its styles
+echo waybar/style.css >> ~/.config/waybar/style.css
+```
+
+### 3. Reload and verify
+
+```bash
+killall -SIGUSR2 waybar      # SIGUSR2 tells Waybar to reload config + style
+```
+
+If the icon does not appear or styling looks wrong, **run Waybar from a
+terminal** — a signal reload hides parse errors, but a foreground run prints
+them with file and line numbers:
+
+```bash
+killall waybar; waybar        # Ctrl-C to stop; read the stderr output
+```
+
+Common messages: a CSS parse error points at a stray or malformed line in
+`style.css`; `Unable to parse config` points at a JSON syntax error (usually a
+missing or extra comma) in `config.jsonc`.
+
+### 4. Hyprland window rule
+
+Append the rules in `hyprland/windowrule.conf` to your Hyprland config, then:
+
+```bash
+hyprctl reload
+```
 
 ## Run the daemon
 

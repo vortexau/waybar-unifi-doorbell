@@ -1,4 +1,7 @@
-/* Append to ~/.config/waybar/style.css */
+/* Append the CONTENTS of this file to ~/.config/waybar/style.css
+   (not the filename — see the README "Wire up Waybar" section).
+   Change the colour to match your theme; if your theme defines colours
+   with @define-color, use e.g. `color: @green;`. */
 #custom-doorbell {
     padding: 0 10px;
     color: #89b4fa;
