@@ -1,7 +1,13 @@
 /* Append the CONTENTS of this file to ~/.config/waybar/style.css
    (not the filename — see the README "Wire up Waybar" section).
    Change the colour to match your theme; if your theme defines colours
-   with @define-color, use e.g. `color: @green;`. */
+   with @define-color, use e.g. `color: @green;`.
+
+   NOTE: if your theme styles modules via a shared selector list
+   (e.g. `#cpu, #memory, #custom-gpu { background: ...; border: ...; }`),
+   add `#custom-doorbell` to that list too so the icon gets the same
+   pill/background/border as your other modules — otherwise it will look
+   unstyled next to them. */
 #custom-doorbell {
     padding: 0 10px;
     color: #89b4fa;
