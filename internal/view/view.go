@@ -1,6 +1,7 @@
 package view
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -23,6 +24,8 @@ type Options struct {
 	RTSPSURL    string
 	Audio       bool
 	Title       string
+	Width       int // live-view window size; 0 = let the compositor decide
+	Height      int
 	RingTimeout time.Duration
 }
 
@@ -41,6 +44,17 @@ func MpvArgs(o Options) []string {
 		args = append(args, "--mute=no")
 	} else {
 		args = append(args, "--mute=yes")
+	}
+	// Size the window from config rather than via a compositor rule: Hyprland
+	// 0.56.2 ignores size/move for floated windows set through window rules
+	// (hyprwm/Hyprland#16446), whereas a client-requested size is honoured.
+	// --geometry centres it; on Wayland positioning may defer to the
+	// compositor, but the size request still applies.
+	if o.Width > 0 && o.Height > 0 {
+		args = append(args,
+			fmt.Sprintf("--autofit=%dx%d", o.Width, o.Height),
+			"--geometry=50%:50%",
+		)
 	}
 	return append(args, o.RTSPSURL)
 }

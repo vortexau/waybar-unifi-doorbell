@@ -112,6 +112,8 @@ func options(cfg *config.Config, url string) view.Options {
 		RTSPSURL:    url,
 		Audio:       cfg.Audio,
 		Title:       view.DefaultTitle,
+		Width:       cfg.Window.Width,
+		Height:      cfg.Window.Height,
 		RingTimeout: time.Duration(cfg.RingTimeoutSeconds) * time.Second,
 	}
 }

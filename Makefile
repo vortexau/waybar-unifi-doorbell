@@ -129,18 +129,27 @@ install-waybar-style: ## Append the #custom-doorbell CSS rule to your Waybar sty
 		echo "appended #custom-doorbell rule to $(WAYBAR_STYLE)"; \
 	fi
 
-install-hypr: ## Install the Hyprland window rule and source it from hyprland.conf (idempotent)
-	@mkdir -p "$(HYPR_DIR)"
-	install -m 0644 hyprland/windowrule.conf "$(HYPR_RULE)"
-	@echo "installed $(HYPR_RULE)"
-	@if [ ! -f "$(HYPR_CONFIG)" ]; then \
-		echo "no $(HYPR_CONFIG); add this line to your Hyprland config:"; \
-		echo "    source = $(HYPR_RULE)"; \
-	elif grep -q 'waybar-unifi-cam.conf' "$(HYPR_CONFIG)"; then \
-		echo "source line already present in $(HYPR_CONFIG); skipping"; \
+install-hypr: ## Install the Hyprland window rule (hyprlang configs only; Lua is manual)
+	@if [ -f "$(HYPR_DIR)/hyprland.lua" ]; then \
+		echo "Lua Hyprland config detected ($(HYPR_DIR)/hyprland.lua)."; \
+		echo "This target only wires a traditional hyprland.conf. Paste the block"; \
+		echo "from hyprland/windowrule.lua into your hyprland.lua by hand, then"; \
+		echo "'hyprctl reload'. The block to add:"; \
+		echo ""; \
+		sed 's/^/    /' hyprland/windowrule.lua; \
 	else \
-		printf '\nsource = %s\n' "$(HYPR_RULE)" >> "$(HYPR_CONFIG)"; \
-		echo "added 'source = $(HYPR_RULE)' to $(HYPR_CONFIG)"; \
+		mkdir -p "$(HYPR_DIR)"; \
+		install -m 0644 hyprland/windowrule.conf "$(HYPR_RULE)"; \
+		echo "installed $(HYPR_RULE)"; \
+		if [ ! -f "$(HYPR_CONFIG)" ]; then \
+			echo "no $(HYPR_CONFIG); add this line to your Hyprland config:"; \
+			echo "    source = $(HYPR_RULE)"; \
+		elif grep -q 'waybar-unifi-cam.conf' "$(HYPR_CONFIG)"; then \
+			echo "source line already present in $(HYPR_CONFIG); skipping"; \
+		else \
+			printf '\nsource = %s\n' "$(HYPR_RULE)" >> "$(HYPR_CONFIG)"; \
+			echo "added 'source = $(HYPR_RULE)' to $(HYPR_CONFIG)"; \
+		fi; \
 	fi
 
 check-waybar-config: ## Report whether the custom/doorbell module is wired in config.jsonc

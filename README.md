@@ -152,10 +152,31 @@ missing or extra comma) in `config.jsonc`.
 
 ### 4. Hyprland window rule
 
-Append the rules in `hyprland/windowrule.conf` to your Hyprland config, then:
+The live-view window needs to float (and stay pinned above other windows). The
+window *size* is set by mpv itself from your `config.json` `window` block, so
+the rule only floats, centres, and pins — this sidesteps a Hyprland 0.56.2 bug
+([#16446](https://github.com/hyprwm/Hyprland/issues/16446)) where `size`/`center`
+are ignored for floated windows set via rules.
+
+**Traditional config** (`~/.config/hypr/hyprland.conf`): append
+`hyprland/windowrule.conf` to it (or `make install-hypr`), then:
 
 ```bash
 hyprctl reload
+```
+
+**Lua config** (`~/.config/hypr/hyprland.lua`): `make install-hypr` does not
+apply here — paste the block from `hyprland/windowrule.lua` into your
+`hyprland.lua` by hand, then `hyprctl reload`:
+
+```lua
+hl.window_rule({
+    name  = "unifi-doorbell",
+    match = { title = "^(unifi-doorbell)$" },
+    float = true,
+    pin   = true,
+    center = true,
+})
 ```
 
 ## Run the daemon

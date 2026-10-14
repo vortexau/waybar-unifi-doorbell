@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 )
@@ -129,6 +130,27 @@ func TestMpvArgsAudio(t *testing.T) {
 	off := MpvArgs(Options{RTSPSURL: "rtsps://x", Audio: false, Title: "t"})
 	if !slices.Contains(off, "--mute=yes") {
 		t.Fatalf("audio-off args wrong: %v", off)
+	}
+}
+
+func TestMpvArgsGeometry(t *testing.T) {
+	// With a size set, mpv is told to size (and centre) itself; the URL stays last.
+	sized := MpvArgs(Options{RTSPSURL: "rtsps://x", Width: 960, Height: 540, Title: "t"})
+	if !slices.Contains(sized, "--autofit=960x540") {
+		t.Fatalf("expected --autofit=960x540 in %v", sized)
+	}
+	if !slices.Contains(sized, "--geometry=50%:50%") {
+		t.Fatalf("expected --geometry in %v", sized)
+	}
+	if sized[len(sized)-1] != "rtsps://x" {
+		t.Fatalf("URL must remain the last arg: %v", sized)
+	}
+	// With no size, no geometry flags are emitted (compositor decides).
+	none := MpvArgs(Options{RTSPSURL: "rtsps://x", Title: "t"})
+	for _, a := range none {
+		if strings.HasPrefix(a, "--autofit") || strings.HasPrefix(a, "--geometry") {
+			t.Fatalf("no geometry expected when size is 0: %v", none)
+		}
 	}
 }
 
