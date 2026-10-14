@@ -13,10 +13,32 @@ Integration API (API key) for both the RTSPS stream URL and the ring event.
 3. **Enable RTSP** on the doorbell: Protect -> doorbell -> Settings -> Advanced
    -> enable an RTSP stream.
 
+## Quick start (Makefile)
+
+The Makefile automates everything that can be done safely. From the repo:
+
+```bash
+make setup            # build + install binary & systemd unit, scaffold config.json,
+                      # append the Waybar CSS rule, install+source the Hyprland rule
+# then edit ~/.config/waybar-unifi-cam/config.json and paste your API key
+make trust            # pin the UDM Pro certificate (confirm the fingerprint)
+make reload           # reload Waybar  (then: hyprctl reload)
+make enable-service   # optional: run the daemon via systemd
+```
+
+`make setup` is idempotent — re-running it skips anything already in place. It
+does **one** thing it cannot finish for you: adding the `custom/doorbell`
+*definition* to `~/.config/waybar/config.jsonc` (a structured edit of a
+hand-commented file). `make check-waybar-config` tells you whether that block is
+still missing and prints exactly what to paste. `make help` lists every target.
+
+The sections below explain each step in full if you prefer to do them by hand.
+
 ## Build & install
 
 ```bash
 go build -o ~/.local/bin/waybar-unifi-cam .
+# or: make install
 ```
 
 ## Configure
