@@ -68,8 +68,24 @@ func TestRTSPSURLPrefersHigh(t *testing.T) {
 }
 
 func TestFindDoorbellAutoDetectFailure(t *testing.T) {
-	cams := []Camera{{ID: "c", Name: "Garage"}}
+	cams := []Camera{{ID: "c", Name: "Garage", Type: "UVC G4 Bullet"}}
 	if _, err := FindDoorbell(cams, ""); err == nil {
 		t.Fatal("expected error when no doorbell can be auto-detected")
+	}
+}
+
+func TestFindDoorbellByType(t *testing.T) {
+	// The Integration API identifies a doorbell by `type`, not isDoorbell, and
+	// the name is often an address with no "doorbell" in it.
+	cams := []Camera{
+		{ID: "x", Name: "Yard", Type: "UVC G4 Bullet"},
+		{ID: "y", Name: "14 Bayley Circuit", Type: "UVC G4 Doorbell"},
+	}
+	db, err := FindDoorbell(cams, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if db.ID != "y" {
+		t.Fatalf("expected doorbell detected by type, got %q", db.ID)
 	}
 }

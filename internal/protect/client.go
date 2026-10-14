@@ -79,8 +79,10 @@ func (c *Client) Cameras(ctx context.Context) ([]Camera, error) {
 }
 
 // FindDoorbell returns the camera matching sel (by id or case-insensitive name).
-// If sel is empty, it returns the first camera flagged isDoorbell, falling back
-// to a name containing "doorbell".
+// If sel is empty, it auto-detects the doorbell: first by the private-API
+// featureFlags.isDoorbell flag (when present), then by "doorbell" appearing in
+// the camera's model `type` (e.g. "UVC G4 Doorbell" — this is what the official
+// Integration API reports), then by "doorbell" in the name.
 func FindDoorbell(cams []Camera, sel string) (Camera, error) {
 	if sel != "" {
 		for _, c := range cams {
@@ -96,7 +98,8 @@ func FindDoorbell(cams []Camera, sel string) (Camera, error) {
 		}
 	}
 	for _, c := range cams {
-		if strings.Contains(strings.ToLower(c.Name), "doorbell") {
+		if strings.Contains(strings.ToLower(c.Type), "doorbell") ||
+			strings.Contains(strings.ToLower(c.Name), "doorbell") {
 			return c, nil
 		}
 	}
