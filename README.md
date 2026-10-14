@@ -21,6 +21,12 @@ go build -o ~/.local/bin/waybar-unifi-cam .
 
 ## Configure
 
+Create the config directory:
+
+```bash
+mkdir -p ~/.config/waybar-unifi-cam
+```
+
 Create `~/.config/waybar-unifi-cam/config.json` (then lock it down):
 
 ```json
